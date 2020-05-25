@@ -1,4 +1,4 @@
-import { Observable, observable, Observer } from "rxjs";
+import { Observable, Observer, Subject } from "rxjs";
 
 const observer: Observer<any> = {
   next: (value) => console.log("next: ", value),
@@ -7,32 +7,21 @@ const observer: Observer<any> = {
 };
 
 const intervalo$ = new Observable<number>((subs) => {
-  let contador = 0;
+  const intervalID = setInterval(() => subs.next(Math.random()), 3000);
 
-  const interval = setInterval(() => {
-    subs.next(contador++);
-  }, 1000);
-
-  setTimeout(() => {
-    subs.complete();
-  }, 2500);
-
-  return () => {
-    clearInterval(interval);
-    console.log("Intérvalo destruido");
-  };
+  return () => clearInterval(intervalID);
 });
 
-const subs1 = intervalo$.subscribe(observer);
-const subs2 = intervalo$.subscribe(observer);
-const subs3 = intervalo$.subscribe(observer);
+/* Subject es un tipo especial de Observable
+  1- Casteo múltiple: muchas subcripciones estan sujetas a este Subject, para distribuir ese valor.
+  2- También  es un observer
+  3- Implementa: next, error y complete
+ */
+const subject$ = new Subject();
+intervalo$.subscribe(subject$);
 
-subs1.add(subs2).add(subs3);
+//const sub1 = intervalo$.subscribe((rnd) => console.log("sub 1:", rnd));
+//const sub2 = intervalo$.subscribe((rnd) => console.log("sub 2:", rnd));
 
-setTimeout(() => {
-  subs1.unsubscribe();
-  //subs2.unsubscribe();
-  //subs3.unsubscribe();
-
-  console.log("Completado Timeout");
-}, 6000);
+const sub1 = subject$.subscribe((rnd) => console.log("sub 1:", rnd));
+const sub2 = subject$.subscribe((rnd) => console.log("sub 2:", rnd));
