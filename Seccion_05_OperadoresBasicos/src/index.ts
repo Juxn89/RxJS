@@ -1,4 +1,4 @@
-import { range, Observable, from } from "rxjs";
+import { range, Observable, from, fromEvent } from "rxjs";
 import { filter, map } from "rxjs/operators";
 
 /*
@@ -29,3 +29,9 @@ const personajes: Personajes[] = [
 from(personajes)
   .pipe(filter((p) => p.tipo === "heroe"))
   .subscribe(console.log);
+
+const keyup$ = fromEvent<KeyboardEvent>(document, "keyup").pipe(
+  map((event) => event.code),
+  filter((key) => key === "Enter")
+);
+keyup$.subscribe(console.log);
