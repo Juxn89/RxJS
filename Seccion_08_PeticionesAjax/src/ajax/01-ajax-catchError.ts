@@ -1,4 +1,4 @@
-const url = "https://api.github.com/usersXXX?per_page=5";
+const url = "https://api.github.com/users?per_page=5";
 
 const manejaErrores = (response: Response) => {
   if (!response.ok) {
