@@ -1,8 +1,15 @@
 import { fromEvent, Observable } from "rxjs";
 import { ajax } from "rxjs/ajax";
-import { map, debounceTime, pluck, mergeAll, mergeMap } from "rxjs/operators";
-import { GithubUser } from "./interfaces/github-user";
-import { GithubUsersResp } from "./interfaces/github-users";
+import {
+  map,
+  debounceTime,
+  pluck,
+  mergeAll,
+  mergeMap,
+  switchMap,
+} from "rxjs/operators";
+import { GithubUser } from "../interfaces/github-user";
+import { GithubUsersResp } from "../interfaces/github-users";
 
 const body = document.querySelector("body");
 const textInput = document.createElement("input");
@@ -34,22 +41,21 @@ const mostrarUsuarios = (usuarios: GithubUser[]) => {
 
 const input$ = fromEvent<KeyboardEvent>(document, "keyup");
 
-input$
-  .pipe(
-    debounceTime<KeyboardEvent>(500),
-    pluck<KeyboardEvent, string>("target", "value"),
-    mergeMap<string, Observable<GithubUsersResp>>((texto) =>
-      ajax.getJSON(`https://api.github.com/search/users?q=${texto}`)
-    ),
-    pluck<GithubUsersResp, GithubUser[]>("items")
-  )
-  .subscribe(mostrarUsuarios);
+input$.pipe(
+  debounceTime<KeyboardEvent>(500),
+  pluck<KeyboardEvent, string>("target", "value"),
+  mergeMap<string, Observable<GithubUsersResp>>((texto) =>
+    ajax.getJSON(`https://api.github.com/search/users?q=${texto}`)
+  ),
+  pluck<GithubUsersResp, GithubUser[]>("items")
+);
+// .subscribe(mostrarUsuarios);
 
 const url = "https://httpbin.org/delay/1?arg=";
 
 input$
   .pipe(
     pluck("target", "value"),
-    mergeMap((texto) => ajax.getJSON(url + texto))
+    switchMap((texto) => ajax.getJSON(url + texto))
   )
   .subscribe(console.log);
